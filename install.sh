@@ -7,7 +7,6 @@
 
 set -e
 
-# Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -86,16 +85,25 @@ install_gitleaks() {
         unzip -q "$FILENAME"
     fi
 
+    # Install to appropriate location based on OS
     if [ "$OS_TYPE" = "windows" ]; then
-        INSTALL_PATH="/usr/local/bin"
+        INSTALL_PATH="$HOME/bin"
         mkdir -p "$INSTALL_PATH"
         mv gitleaks.exe "$INSTALL_PATH/" 2>/dev/null || mv gitleaks "$INSTALL_PATH/"
+        echo -e "${YELLOW}[INFO]${NC} Add to PATH: export PATH=\"\$HOME/bin:\$PATH\""
     else
-        sudo mv gitleaks /usr/local/bin/ 2>/dev/null || mv gitleaks /usr/local/bin/
+        if [ -w "/usr/local/bin" ]; then
+            mv gitleaks /usr/local/bin/
+        else
+            sudo mv gitleaks /usr/local/bin/
+        fi
     fi
 
     cd - > /dev/null
     rm -rf "$TMP_DIR"
+
+    # Add to PATH for current session
+    export PATH="$HOME/bin:$PATH"
 
     echo -e "${GREEN}[OK]${NC} Gitleaks installed successfully"
 }
@@ -135,6 +143,11 @@ main() {
     echo -e "  Enable hook:   ${YELLOW}git config hooks.gitleaks true${NC}"
     echo -e "  Skip once:     ${YELLOW}git commit --no-verify${NC}"
     echo ""
+    if [ "$OS_TYPE" = "windows" ]; then
+        echo -e "${YELLOW}[NOTE]${NC} Add this to your ~/.bashrc for permanent PATH:"
+        echo -e "  echo 'export PATH=\"\$HOME/bin:\$PATH\"' >> ~/.bashrc"
+        echo ""
+    fi
 }
 
 main

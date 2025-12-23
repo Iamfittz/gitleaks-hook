@@ -10,6 +10,9 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
+# Add ~/bin to PATH for Windows
+export PATH="$HOME/bin:$PATH"
+
 GITLEAKS_ENABLED=$(git config --get hooks.gitleaks)
 
 if [ "$GITLEAKS_ENABLED" != "true" ]; then
