@@ -22,7 +22,6 @@ echo -e "${BLUE}   Gitleaks Pre-Commit Hook Installer  ${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
-# Detect OS and architecture
 detect_platform() {
     OS="$(uname -s)"
     ARCH="$(uname -m)"
@@ -44,7 +43,6 @@ detect_platform() {
     echo -e "${GREEN}[OK]${NC} Detected: $OS_TYPE ($ARCH_TYPE)"
 }
 
-# Install gitleaks
 install_gitleaks() {
     if command -v gitleaks &> /dev/null; then
         CURRENT_VERSION=$(gitleaks version 2>/dev/null || echo "unknown")
@@ -102,7 +100,6 @@ install_gitleaks() {
     echo -e "${GREEN}[OK]${NC} Gitleaks installed successfully"
 }
 
-# Install pre-commit hook
 install_hook() {
     if [ ! -d ".git" ]; then
         echo -e "${RED}[ERROR]${NC} Not a git repository. Run this from your project root."
@@ -117,13 +114,11 @@ install_hook() {
     echo -e "${GREEN}[OK]${NC} Pre-commit hook installed"
 }
 
-# Enable hook via git config
 enable_hook() {
     git config hooks.gitleaks true
     echo -e "${GREEN}[OK]${NC} Hook enabled (git config hooks.gitleaks = true)"
 }
 
-# Main
 main() {
     detect_platform
     install_gitleaks
