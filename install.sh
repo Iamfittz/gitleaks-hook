@@ -54,7 +54,6 @@ install_gitleaks() {
 
     echo -e "${YELLOW}[INFO]${NC} Installing gitleaks v${GITLEAKS_VERSION}..."
 
-    # Build download URL
     case "$OS_TYPE" in
         linux)
             FILENAME="gitleaks_${GITLEAKS_VERSION}_linux_${ARCH_TYPE}.tar.gz"
@@ -71,11 +70,9 @@ install_gitleaks() {
     
     echo -e "${YELLOW}[INFO]${NC} Downloading from: $DOWNLOAD_URL"
 
-    # Create temp directory
     TMP_DIR=$(mktemp -d)
     cd "$TMP_DIR"
 
-    # Download
     if command -v curl &> /dev/null; then
         curl -sSL -o "$FILENAME" "$DOWNLOAD_URL"
     elif command -v wget &> /dev/null; then
@@ -85,14 +82,12 @@ install_gitleaks() {
         exit 1
     fi
 
-    # Extract
     if [[ "$FILENAME" == *.tar.gz ]]; then
         tar -xzf "$FILENAME"
     else
         unzip -q "$FILENAME"
     fi
 
-    # Install binary
     if [ "$OS_TYPE" = "windows" ]; then
         INSTALL_PATH="/usr/local/bin"
         mkdir -p "$INSTALL_PATH"
@@ -101,7 +96,6 @@ install_gitleaks() {
         sudo mv gitleaks /usr/local/bin/ 2>/dev/null || mv gitleaks /usr/local/bin/
     fi
 
-    # Cleanup
     cd - > /dev/null
     rm -rf "$TMP_DIR"
 
@@ -110,7 +104,6 @@ install_gitleaks() {
 
 # Install pre-commit hook
 install_hook() {
-    # Check if we're in a git repo
     if [ ! -d ".git" ]; then
         echo -e "${RED}[ERROR]${NC} Not a git repository. Run this from your project root."
         exit 1
@@ -118,10 +111,7 @@ install_hook() {
 
     echo -e "${YELLOW}[INFO]${NC} Installing pre-commit hook..."
 
-    # Download hook
     curl -sSL -o .git/hooks/pre-commit "${HOOK_REPO}/hooks/pre-commit"
-    
-    # Make executable
     chmod +x .git/hooks/pre-commit
 
     echo -e "${GREEN}[OK]${NC} Pre-commit hook installed"
@@ -130,3 +120,26 @@ install_hook() {
 # Enable hook via git config
 enable_hook() {
     git config hooks.gitleaks true
+    echo -e "${GREEN}[OK]${NC} Hook enabled (git config hooks.gitleaks = true)"
+}
+
+# Main
+main() {
+    detect_platform
+    install_gitleaks
+    install_hook
+    enable_hook
+
+    echo ""
+    echo -e "${GREEN}========================================${NC}"
+    echo -e "${GREEN}   Installation complete!              ${NC}"
+    echo -e "${GREEN}========================================${NC}"
+    echo ""
+    echo -e "Commands:"
+    echo -e "  Disable hook:  ${YELLOW}git config hooks.gitleaks false${NC}"
+    echo -e "  Enable hook:   ${YELLOW}git config hooks.gitleaks true${NC}"
+    echo -e "  Skip once:     ${YELLOW}git commit --no-verify${NC}"
+    echo ""
+}
+
+main
